@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/post-model');
+const User = require('../models/user-model');
 const mongoose = require('mongoose');
 
 router.get('/post', (req, res, next) => {
@@ -54,15 +55,30 @@ router.get('/postsBy/:id', (req, res, next) => {
         .then(user => {
             Post.find()
                 .populate('author')
-                .then(posts => {
-                    let usersPosts = posts.filter(post => {
-                        return post.author._id === user._id
-                    })
-                    res.status(200).json(usersPosts)
+                .then((posts) => {
+                    // function filterByID(post) {
+                    //     if (post.author._id === user._id) {
+                    //         return true;
+                    //     } else {
+                    //         return false;
+                    //     }
+                    // }
+
+                    // let usersPosts = posts.filter(filterByID)
+                    // for (var i = 0; i < posts.length; i++) {
+                    //     if (posts[i].author._id === user._id) {
+                    //         console.log("same")
+                    //     }
+                    // }
+                    res.status(200).json(posts)
                 })
-                .catch()
+                .catch(err => {
+                    console.log(err)
+                })
         })
-        .catch()
+        .catch(err => {
+            console.log(err)
+        })
 })
 
 module.exports = router

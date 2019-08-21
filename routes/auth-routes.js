@@ -45,7 +45,9 @@ authRoutes.post('/signup', uploadCloud.single('picture'), (req, res, next) => {
             username: username,
             password: hashPass,
             profilePicUrl: req.file.url,
-            profilePicName: req.file.originalname
+            profilePicName: req.file.originalname,
+            longitude: req.body.longitude,
+            latitude: req.body.latitude
         });
 
         aNewUser.save(err => {
