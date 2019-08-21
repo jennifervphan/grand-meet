@@ -16,12 +16,9 @@ const userSchema = new Schema({
         type: Number,
         default: 0
     }
-    // ,
-    // chatRooms: [Object]
-
 }, {
     timestamps: true
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('users', userSchema);
 module.exports = User;

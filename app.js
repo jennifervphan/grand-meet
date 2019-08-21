@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const favicon = require('serve-favicon');
-const hbs = require('hbs');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo')(session);
@@ -37,39 +36,22 @@ const debug = require('debug')(`${app_name}:${path.basename(__filename).split('.
 
 const app = express();
 
-app.use(cors({
-    credentials: true,
-    origin: [process.env.origin] // <== this will be the URL of our React app (it will be running on port 3000)
-}));
-
 // Middleware Setup
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(require('./middleware/userInViews')());
-
 
 // Express View engine setup
-
 app.use(require('node-sass-middleware')({
     src: path.join(__dirname, 'public'),
     dest: path.join(__dirname, 'public'),
     sourceMap: true
 }));
-
-
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 
 // ADD SESSION SETTINGS HERE:
-// app.use(session({
-//     secret: "some secret goes here",
-//     resave: true,
-//     saveUninitialized: true
-// }));
 app.use(session({
     name: "session",
     secret: process.env.SECRET,
@@ -91,6 +73,10 @@ app.locals.title = 'grandMeet';
 
 
 // ADD CORS SETTINGS HERE TO ALLOW CROSS-ORIGIN INTERACTION:
+app.use(cors({
+    credentials: true,
+    origin: [process.env.origin] // <== this will be the URL of our React app (it will be running on port 3000)
+}));
 
 
 
@@ -105,6 +91,7 @@ app.use('/api', require('./routes/inbox'));
 app.use('/api', require('./routes/newChat'));
 app.use('/api', require('./routes/share'));
 app.use('/api', require('./routes/game'));
+app.use('/api', require('./routes/post'));
 
 app.use((req, res, next) => {
     // If no routes match, send them the React HTML.
