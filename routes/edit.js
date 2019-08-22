@@ -6,7 +6,6 @@ const User = require('../models/user-model');
 
 router.post('/edit', uploadCloud.single('picture'), (req, res, next) => {
     const about = req.body.about;
-    const user = req.body.user;
     let userId = req.user._id;
     let updateUser = {
         about: about,
