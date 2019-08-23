@@ -13,7 +13,10 @@ router.get('/newChat', (req, res, next) => {
             userId: `${req.user.username}`,
         })
         .then((rooms) => {
-            res.status(200).send(rooms)
+            let filtered = rooms.filter(room => {
+                return room.private === true
+            })
+            res.status(200).send(filtered)
         }).catch((err) => {
             console.log(err);
         });
