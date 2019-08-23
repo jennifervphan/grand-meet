@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../models/post-model');
 const User = require('../models/user-model');
+const Comment = require('../models/comment-model');
 const mongoose = require('mongoose');
 
 router.get('/post', (req, res, next) => {
@@ -42,7 +43,17 @@ router.get('/post/:id', (req, res, next) => {
     Post.findOne({ _id: postId })
         .populate('author')
         .then(post => {
-            res.status(200).json(post)
+            Comment.find({
+                    post: postId
+                }, null, {
+                    sort: {
+                        writtenAt: -1
+                    }
+                })
+                .populate("author")
+                .then(comments => {
+                    res.status(200).json({ post, comments })
+                })
         })
         .catch(err => {
             console.log(err)
@@ -56,20 +67,6 @@ router.get('/postsBy/:id', (req, res, next) => {
             Post.find()
                 .populate('author')
                 .then((posts) => {
-                    // function filterByID(post) {
-                    //     if (post.author._id === user._id) {
-                    //         return true;
-                    //     } else {
-                    //         return false;
-                    //     }
-                    // }
-
-                    // let usersPosts = posts.filter(filterByID)
-                    // for (var i = 0; i < posts.length; i++) {
-                    //     if (posts[i].author._id === user._id) {
-                    //         console.log("same")
-                    //     }
-                    // }
                     res.status(200).json(posts)
                 })
                 .catch(err => {
@@ -81,4 +78,63 @@ router.get('/postsBy/:id', (req, res, next) => {
         })
 })
 
+router.post('/editPost/:id', (req, res, next) => {
+    let postId = mongoose.Types.ObjectId(req.params.id);
+    let updatePost = {
+        title: req.body.title,
+        text: req.body.text.split("\n"),
+        writtenAt: new Date()
+    }
+    Post.findByIdAndUpdate(postId, updatePost, { new: true })
+        .then(updated => {
+            res.status(200).json(updated)
+        })
+        .catch(err => {
+            console.log(err)
+        })
+})
+
+router.post('/deletePost/:id', (req, res, next) => {
+    let postId = mongoose.Types.ObjectId(req.params.id);
+    Post.findByIdAndDelete({ _id: postId })
+        .then(() => {
+            res.status(200).json({ post: null })
+        })
+        .catch(err => {
+            console.log(err)
+        })
+})
+
+router.post('/post/:id/comment', (req, res, next) => {
+    let postId = req.params.id
+    let user = req.body.user
+    console.log(req.body)
+    Post.findById(postId).then(post => {
+        let newComment = new Comment({
+            author: mongoose.Types.ObjectId(user._id),
+            post: mongoose.Types.ObjectId(postId),
+            text: req.body.comment.split("\n")
+        })
+        newComment.save()
+            .then(() => {
+                Post.findOne({ _id: postId })
+                    .populate("author")
+                    .then(post => {
+                        Comment.find({
+                                post: postId
+                            }, null, {
+                                sort: {
+                                    writtenAt: -1
+                                }
+                            })
+                            .populate("author")
+                            .then(comments => {
+                                res.status(200).json({ post, comments })
+                            })
+                    })
+            })
+    }).catch(error => {
+        console.error(error)
+    })
+});
 module.exports = router
