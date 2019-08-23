@@ -56,15 +56,14 @@ authRoutes.post('/signup', uploadCloud.single('picture'), (req, res, next) => {
                 return;
             }
             // Automatically log in user after sign up
-            // .login() here is actually predefined passport method
             req.login(aNewUser, (err) => {
 
                 if (err) {
                     res.status(500).json({ message: 'Login after signup went bad.' });
                     return;
                 }
-                // chatkit creat new user
 
+                // chatkit creat new user
                 chatkit.createUser({
                         id: aNewUser.username,
                         name: aNewUser.username
@@ -91,8 +90,7 @@ authRoutes.post('/login', (req, res, next) => {
 
         if (!theUser) {
             // "failureDetails" contains the error messages
-            // from our logic in "LocalStrategy" { message: '...' }.
-            res.status(401).json(failureDetails);
+            res.status(401).json({ message: 'User not found' });
             return;
         }
 
@@ -127,8 +125,6 @@ authRoutes.post('/login', (req, res, next) => {
                     let { username, _id, profilePicUrl, about, longitude, latitude } = user;
                     res.status(200).json({ username, _id, profilePicUrl, about, longitude, latitude });
                 })
-                // We are now logged in (that's why we can also send req.user)
-
         });
     })(req, res, next);
 });
